@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Shop Credit App</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+body { font-family: Arial; padding:20px; }
+input, button { padding:10px; margin:5px 0; width:100%; }
+button { background:#1976d2; color:white; border:none; }
+</style>
+</head>
+
+<body>
+
+<h2>Shop Credit Login</h2>
+
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<p id="status"></p>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB0xBi2JBcgJ54gRPqZC0UFxL2VAECyQzk",
+  authDomain: "shopcreditapp.firebaseapp.com",
+  projectId: "shopcreditapp",
+  storageBucket: "shopcreditapp.firebasestorage.app",
+  messagingSenderId: "594237813147",
+  appId: "1:594237813147:web:8164b35b8fa4985376713e"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+function login() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Login Success ✅";
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText = error.message;
+    });
+}
+
+</script>
+
+</body>
+</html>
