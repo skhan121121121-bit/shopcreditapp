@@ -2,27 +2,34 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Shop Credit App</title>
+<title>Shop Credit Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; padding:20px; }
+body { font-family: Arial; padding:20px; background:#f5f5f5; }
 input, button { padding:10px; margin:5px 0; width:100%; }
 button { background:#1976d2; color:white; border:none; }
+.card { background:white; padding:10px; margin:10px 0; border-radius:5px; }
+.delete { background:red; }
+.total { font-weight:bold; font-size:18px; margin-top:10px; }
 </style>
 </head>
 
 <body>
 
-<h2>Shop Credit Login</h2>
+<h2>Shop Credit Dashboard</h2>
 
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button onclick="login()">Login</button>
+<input type="text" id="name" placeholder="Customer Name">
+<input type="text" id="mobile" placeholder="Mobile Number">
+<input type="number" id="amount" placeholder="Due Amount">
+<button onclick="addCustomer()">Add Customer</button>
 
-<p id="status"></p>
+<div class="total">Total Due: ₹ <span id="total">0</span></div>
+
+<div id="customerList"></div>
 
 <script>
 
@@ -35,19 +42,59 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
+const db = firebase.firestore();
 
-function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+function addCustomer() {
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      document.getElementById("status").innerText = "Login Success ✅";
-    })
-    .catch((error) => {
-      document.getElementById("status").innerText = error.message;
-    });
+  const name = document.getElementById("name").value;
+  const mobile = document.getElementById("mobile").value;
+  const amount = document.getElementById("amount").value;
+
+  if(name === "" || mobile === "" || amount === "") {
+    alert("Fill all fields");
+    return;
+  }
+
+  db.collection("customers").add({
+    name: name,
+    mobile: mobile,
+    amount: Number(amount),
+    created: new Date()
+  });
+
+  document.getElementById("name").value = "";
+  document.getElementById("mobile").value = "";
+  document.getElementById("amount").value = "";
+}
+
+db.collection("customers").orderBy("created","desc")
+.onSnapshot(snapshot => {
+
+  let html = "";
+  let total = 0;
+
+  snapshot.forEach(doc => {
+
+    const data = doc.data();
+    total += data.amount;
+
+    html += `
+      <div class="card">
+        <strong>${data.name}</strong><br>
+        📞 ${data.mobile}<br>
+        ₹ ${data.amount}<br>
+        <button class="delete" onclick="deleteCustomer('${doc.id}')">Delete</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("customerList").innerHTML = html;
+  document.getElementById("total").innerText = total;
+
+});
+
+function deleteCustomer(id) {
+  db.collection("customers").doc(id).delete();
 }
 
 </script>
